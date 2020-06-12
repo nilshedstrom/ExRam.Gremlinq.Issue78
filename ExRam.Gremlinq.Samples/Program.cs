@@ -95,22 +95,24 @@ namespace ExRam.Gremlinq.Samples
             //This query will always return nothing because sum is a reducing barrier step http://kelvinlawrence.net/book/PracticalGremlin.html#rbarriers
             //and it will cause the database to forget the values stored in ownerAge and pet.
             var pet = await _g.V<Pet>().Where(p => p.Name.Value == "Charlie").Limit(1)
-                .As((__, pet) =>
-                    __.In<Owns>().OfType<Person>().Values(p => p.Age).As((__, ownerAge) =>
-                        __.Select(pet).Values(p => p.Age).Union(__ => __.Identity(), __ => __.Constant(30)).Sum().As((
-                                __, ownerMaxAge) =>
-                            __.Select(pet).Where(pet => ownerAge <= ownerMaxAge))));
+                .As((__, pet) => __
+                    .Where(__ => __
+                        .In<Owns>().OfType<Person>()
+                        .Values(x => x.Age)
+                        .As((__, ownerAge) => __
+                            .Select(pet)
+                            .Where(pet => pet.Age < ownerAge.Value)
+                            .Local(__ => __.Values(x => x.Age).Union(__ => __.Identity(), __ => __.Constant(30)).Sum())
+                            .As((__, ownerMaxAge) => __
+                                .Where(_ => ownerAge.Value <= ownerMaxAge.Value)))));
 
-            //Check if the pet Charlie has owner which is older than him but not more than 30 years older
-            //This will cause an exception
-            var petAlternative = await _g
-                .V<Pet>().Where(p => p.Name.Value == "Charlie").Limit(1)
-                .Project(x =>
-                    x.ToDynamic()
-                        .By("petAge", pet => pet.Age)
-                        .By("ownerMaxAge", pet => pet.Values(p => p.Age).Inject(30).Sum())
-                        .By("ownerAge", pet => pet.In<Owns>().OfType<Person>().Values(p => p.Age)))
-                .Cast<Result>().Where(GetFilterExpression()).ToArrayAsync();
+            //Very nice to have syntax but currently not supported by Gremlinq. Of course I am accepting pull requests...
+            //var pet2 = await _g.V<Pet>().Where(p => p.Name.Value == "Charlie").Limit(1)
+            //    .As((__, pet) => __
+            //        .Where(__ => __
+            //            .In<Owns>().OfType<Person>()
+            //            .Where(owner => pet.Value.Age < owner.Age)
+            //            .Where(owner => owner.Age <= pet.Value.Age + 30)));
         }
 
         private static Expression<Func<Result, bool>> GetFilterExpression()
