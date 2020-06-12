@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <LangVersion>8.0</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(SolutionName)' == 'ExRam.Gremlinq'">
+    <ProjectReference Include="..\..\ExRam.Gremlinq.Providers.CosmosDb\ExRam.Gremlinq.Providers.CosmosDb.csproj" />
+    <ProjectReference Include="..\..\ExRam.Gremlinq.Providers.GremlinServer\ExRam.Gremlinq.Providers.GremlinServer.csproj" />
+    <ProjectReference Include="..\..\ExRam.Gremlinq.Providers.Neptune\ExRam.Gremlinq.Providers.Neptune.csproj" />
+    <ProjectReference Include="..\..\ExRam.Gremlinq.Providers.JanusGraph\ExRam.Gremlinq.Providers.JanusGraph.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(SolutionName)' == 'ExRam.Gremlinq.Samples'">
+    <PackageReference Include="ExRam.Gremlinq.Providers.CosmosDb" Version="8.0.0-preview-0707" />
+    <PackageReference Include="ExRam.Gremlinq.Providers.Neptune" Version="8.0.0-preview-0707" />
+    <PackageReference Include="ExRam.Gremlinq.Providers.GremlinServer" Version="8.0.0-preview-0707" />
+    <PackageReference Include="ExRam.Gremlinq.Providers.JanusGraph" Version="8.0.0-preview-0707" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.2" />
+  </ItemGroup>
+</Project>
